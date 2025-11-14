@@ -1,0 +1,15 @@
+name: kinectv2-test
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.8
+  - pip
+  - pip:
+      - comtypes==1.4.12
+      - numpy==1.24.4
+      - opencv-python==4.10.0
+      - opencv-python-headless==4.10.0
+      - pykinect2==0.1.0
+
