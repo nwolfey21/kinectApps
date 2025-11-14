@@ -8,7 +8,7 @@ A collection of Python applications for capturing and visualizing data from Micr
 - **Depth Frame Visualization**: Depth map visualization with color mapping
 - **Body Skeleton Tracking**: Real-time body pose detection and skeleton overlay on color frames
 - **Multi-frame Support**: Simultaneous capture of color, depth, and body tracking data
-- **Stick Figure Animation**: Real-time stick figure drawing controlled by Kinect body movement
+- **Stick Figure Animation**: Real-time stick figure drawing controlled by Kinect body movement with support for multiple people (up to 6)
 
 ## Requirements
 
@@ -61,12 +61,20 @@ python kinect_stick_figure.py
 The application will:
 - Initialize the Kinect v2 sensor (body tracking only)
 - Display a single window with a black background
-- Draw a white stick figure that mirrors your movements in real-time
-- Automatically scale and center the stick figure in the display window
+- Draw stick figure(s) that mirror movements in real-time
+- Support multiple people simultaneously (up to 6, Kinect v2 limit)
+- Assign distinct colors to each person for easy identification:
+  - Person 1: White
+  - Person 2: Yellow
+  - Person 3: Magenta
+  - Person 4: Green
+  - Person 5: Blue
+  - Person 6: Orange
+- Automatically scale and center all stick figures in the display window
 - Apply smoothing to reduce jitter in the animation
 - Press **ESC** to quit
 
-**Note**: Move in front of the Kinect sensor to see your stick figure. The stick figure will follow your body movements, including arms, legs, and torso.
+**Note**: Move in front of the Kinect sensor to see your stick figure(s). Each stick figure will follow the corresponding person's body movements, including arms, legs, and torso. Multiple people can be tracked simultaneously, each with their own colored stick figure.
 
 ## Dependencies
 
@@ -93,10 +101,12 @@ kinectApps/
   - Joints are displayed as circles: green for tracked, yellow for inferred
   - Bones are drawn as green lines connecting tracked joints
 - **kinect_stick_figure.py**:
-  - Draws a clean white stick figure on a black background
-  - Only tracks the first detected body for simplicity
-  - Automatically scales and centers the figure for optimal viewing
-  - Uses smoothing to create fluid animation
+  - Draws clean stick figures on a black background
+  - Tracks up to 6 people simultaneously (Kinect v2 limit)
+  - Each person gets a distinct color for easy identification
+  - Automatically scales and centers all figures for optimal viewing
+  - Uses per-person smoothing to create fluid animation
+  - Calculates combined bounding box to fit all figures in view
 
 ## Troubleshooting
 
