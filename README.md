@@ -10,6 +10,7 @@ A collection of Python applications for capturing and visualizing data from Micr
 - **Multi-frame Support**: Simultaneous capture of color, depth, and body tracking data
 - **Stick Figure Animation**: Real-time stick figure drawing controlled by Kinect body movement with support for multiple people (up to 6)
 - **Paint Canvas**: Interactive fluid paint simulation where hand movements control paint flow with rainbow colors on a white canvas
+- **Ring Collector Game**: Interactive game where players collect gold rings by touching them with their hands, featuring a space background, body shadow tracking, timer, and automatic game reset
 
 ## Requirements
 
@@ -97,6 +98,39 @@ The application will:
 
 **Note**: Move your hands in front of the Kinect sensor to pour paint onto the canvas. Faster movements create more particles with higher velocity. Particles follow physics (gravity, friction) and stick to the canvas when they stop moving, creating a lasting painting effect. The canvas slowly fades back to white over time, but stuck particles remain visible.
 
+### Ring Collector Game
+
+Run the ring collector game:
+```bash
+python kinect_v2_ring_collector.py
+```
+
+The application will:
+- Initialize the Kinect v2 sensor (body tracking only)
+- Display a space-themed background with stars
+- Place 15 gold rings randomly across the playable area (avoiding outer 10% on left/right sides)
+- Track your body as a dark shadow skeleton
+- Detect when your hands "touch" rings to collect them
+- Display score and timer in the top corners
+- When all rings are collected:
+  - Stop the timer
+  - Display magnified score and completion time for 5 seconds
+  - Show countdown from 10 to start the next round
+  - Automatically reset and start a new game
+- Press **ESC** to quit
+
+**Game Features**:
+- **Space Background**: Dark blue-purple background with randomly generated stars
+- **Gold Rings**: Animated rings with pulsing and sparkle effects
+- **Body Shadow**: Real-time skeleton shadow tracking your movements
+- **Collision Detection**: Rings disappear when your hand gets within touch distance
+- **Timer**: Tracks your completion time (MM:SS.CS format)
+- **Score Display**: Shows current score (collected/total rings)
+- **Auto-Reset**: Game automatically resets after countdown for continuous play
+- **Smart Placement**: Rings are spaced to avoid overlap and placed away from screen edges
+
+**Note**: Move your hands in front of the Kinect sensor to collect the gold rings. Your body shadow will follow your movements in real-time. Touch rings with either hand to collect them. The game tracks your best time and automatically starts a new round after you complete all rings.
+
 ## Dependencies
 
 - `pykinect2`: Python wrapper for Kinect v2 SDK
@@ -112,7 +146,8 @@ kinectApps/
 ├── environment.yml              # Conda environment configuration
 ├── kinect_v2_full_test.py      # Full test application with color, depth, and skeleton
 ├── kinect_stick_figure.py      # Stick figure animation controlled by Kinect movement
-└── kinect_v2_paint_canvas.py   # Interactive paint canvas with particle physics
+├── kinect_v2_paint_canvas.py   # Interactive paint canvas with particle physics
+└── kinect_v2_ring_collector.py # Ring collector game with space theme and body tracking
 ```
 
 ## Notes
@@ -139,6 +174,19 @@ kinectApps/
   - Particles follow physics: gravity pulls them down, friction slows them
   - Canvas slowly fades back to white over time, but stuck particles persist
   - Supports up to 6 people simultaneously (Kinect v2 limit)
+- **kinect_v2_ring_collector.py**:
+  - Space-themed game with starfield background
+  - 15 gold rings placed randomly with smart spacing algorithm
+  - Rings avoid outer 10% of left/right screen edges for better accessibility
+  - Real-time body shadow tracking (skeleton overlay)
+  - Hand-based collision detection for ring collection
+  - Timer tracks completion time with centisecond precision
+  - Score display shows collected/total rings
+  - Magnified results screen after completion (5 seconds)
+  - Countdown from 10 before next round
+  - Automatic game reset for continuous play
+  - Rings feature pulsing animation and rotating sparkle effects
+  - Supports multiple people simultaneously (each person can collect rings)
 
 ## Troubleshooting
 
