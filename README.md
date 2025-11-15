@@ -8,6 +8,8 @@ A collection of Python applications for capturing and visualizing data from Micr
 - **Depth Frame Visualization**: Depth map visualization with color mapping
 - **Body Skeleton Tracking**: Real-time body pose detection and skeleton overlay on color frames
 - **Multi-frame Support**: Simultaneous capture of color, depth, and body tracking data
+
+## Games
 - **Stick Figure Animation**: Real-time stick figure drawing controlled by Kinect body movement with support for multiple people (up to 6)
 - **Paint Canvas**: Interactive fluid paint simulation where hand movements control paint flow with rainbow colors on a white canvas
 - **Ring Collector Game**: Interactive game where players collect gold rings by touching them with their hands, featuring a space background, body shadow tracking, timer, and automatic game reset
