@@ -1,6 +1,6 @@
 # Kinect v2 Applications
 
-A collection of Python applications for capturing and visualizing data from Microsoft Kinect v2, including color frames, depth maps, body skeleton tracking, stick figure animation, interactive paint canvas, and mixed reality ring collector game.
+A collection of Python applications for capturing and visualizing data from Microsoft Kinect v2, including color frames, depth maps, body skeleton tracking, stick figure animation, interactive paint canvas, mixed reality ring collector game, and competitive hand-on-ring challenge game.
 
 ## Features
 
@@ -11,6 +11,7 @@ A collection of Python applications for capturing and visualizing data from Micr
 - **Stick Figure Animation**: Real-time stick figure drawing controlled by Kinect body movement with support for multiple people (up to 6)
 - **Paint Canvas**: Interactive fluid paint simulation where hand movements control paint flow with rainbow colors on a white canvas
 - **Ring Collector Game**: Mixed reality game where players collect gold rings overlaid on live Kinect video feed, featuring body shadow tracking, timer, and automatic game reset
+- **Hand on Ring Game**: Competitive elimination game where players must keep their hands on moving colored rings, with single-player challenge mode and progressive difficulty
 
 ## Requirements
 
@@ -131,6 +132,49 @@ The application will:
 
 **Note**: Move your hands in front of the Kinect sensor to collect the gold rings. You'll see yourself and your environment on screen with rings overlaid in mixed reality. Your body shadow will follow your movements in real-time. Touch rings with either hand to collect them. The game tracks your completion time and automatically starts a new round after you complete all rings.
 
+### Hand on Ring Game
+
+Run the hand on ring challenge game:
+```bash
+python kinect_v2_hand_on_ring.py
+```
+
+The application will:
+- Initialize the Kinect v2 sensor (color video and body tracking)
+- Display live color video feed from the Kinect camera as the background
+- Start with a 10-second countdown instructing players to put their hands on colored rings
+- Assign each tracked player a unique colored ring
+- When countdown ends:
+  - Rings with hands on them start moving at increasing speeds
+  - Rings without hands disappear
+  - Players must keep their hands on their rings as they move
+- In multi-player mode:
+  - Last player with hand on ring wins
+  - Players eliminated if hand leaves ring for 2+ seconds
+- In single-player mode (if only one player has hand on ring):
+  - 20-second challenge mode activates
+  - Ring moves at increasing speed
+  - Player must maintain contact for full 20 seconds to win
+  - Any break in contact results in loss
+- Winner celebration displays for 10 seconds
+- 10-second countdown before next round
+- Automatically resets and starts new game
+- Press **ESC** to quit
+
+**Game Features**:
+- **Mixed Reality**: Colored rings overlaid on live Kinect color video feed
+- **Multi-Player Mode**: Competitive elimination with moving rings
+- **Single-Player Challenge**: 20-second endurance challenge with accelerating ring movement
+- **Progressive Difficulty**: Ring speed increases over time in both modes (faster in single-player)
+- **Body Shadow**: Real-time skeleton shadow tracking overlaid on video
+- **Hand Tracking**: Precise detection of hand position relative to rings
+- **Elimination System**: Players eliminated if hand leaves ring for 2+ seconds (multi-player) or any break (single-player)
+- **Smart Ring Movement**: Rings bounce off walls and change direction randomly
+- **Color-Coded Players**: Each player gets a unique color (Blue, Green, Red, Yellow, Magenta, Cyan)
+- **Auto-Reset**: Game automatically resets after winner celebration for continuous play
+
+**Note**: Stand in front of the Kinect sensor during the 10-second countdown and place your hand on your assigned colored ring. Once the game starts, keep your hand on your ring as it moves! The ring will move faster over time, making it increasingly challenging. In single-player mode, you must maintain contact for the full 20 seconds to win the challenge. Your body shadow will track your movements in real-time on the video feed.
+
 ## Dependencies
 
 - `pykinect2`: Python wrapper for Kinect v2 SDK
@@ -147,7 +191,8 @@ kinectApps/
 ├── kinect_v2_full_test.py      # Full test application with color, depth, and skeleton
 ├── kinect_stick_figure.py      # Stick figure animation controlled by Kinect movement
 ├── kinect_v2_paint_canvas.py   # Interactive paint canvas with particle physics
-└── kinect_v2_ring_collector.py # Ring collector game with space theme and body tracking
+├── kinect_v2_ring_collector.py # Ring collector game with mixed reality and body tracking
+└── kinect_v2_hand_on_ring.py   # Competitive hand-on-ring challenge game
 ```
 
 ## Notes
@@ -188,6 +233,21 @@ kinectApps/
   - Rings feature pulsing animation and rotating sparkle effects
   - Supports multiple people simultaneously (each person can collect rings)
   - Uses Kinect color frame (1920x1080) as canvas for true mixed reality experience
+- **kinect_v2_hand_on_ring.py**:
+  - Competitive elimination game with mixed reality overlay
+  - 10-second start countdown with instructions
+  - Each player assigned unique colored ring (up to 6 players)
+  - Rings move at increasing speed over time
+  - Multi-player mode: last player with hand on ring wins
+  - Single-player challenge mode: 20-second endurance test
+  - Progressive difficulty: speed increases faster in single-player mode (0.2x/sec vs 0.1x/sec)
+  - Elimination: 2-second grace period in multi-player, instant in single-player
+  - Rings bounce off walls and change direction randomly
+  - Real-time body shadow tracking on video background
+  - Winner celebration (10 seconds) followed by new round countdown
+  - Automatic game reset for continuous play
+  - Uses Kinect color frame (1920x1080) as canvas for mixed reality
+  - Supports up to 6 people simultaneously (Kinect v2 limit)
 
 ## Troubleshooting
 
