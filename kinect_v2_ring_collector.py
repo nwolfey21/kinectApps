@@ -20,34 +20,6 @@ class Ring:
         self.pulse_phase = random.uniform(0, 2 * math.pi)  # Random starting phase for pulsing
 
 
-def create_space_background(width, height):
-    """Create a space-like background with stars."""
-    # Create dark blue/black background
-    background = np.zeros((height, width, 3), dtype=np.uint8)
-    
-    # Add some dark blue tint
-    background[:, :] = (10, 5, 20)  # Dark blue-purple
-    
-    # Add stars (random white dots)
-    num_stars = 200
-    for _ in range(num_stars):
-        x = random.randint(0, width - 1)
-        y = random.randint(0, height - 1)
-        brightness = random.randint(100, 255)
-        size = random.randint(1, 2)
-        cv2.circle(background, (x, y), size, (brightness, brightness, brightness), -1)
-    
-    # Add some larger "stars" (planets/distant objects)
-    for _ in range(10):
-        x = random.randint(0, width - 1)
-        y = random.randint(0, height - 1)
-        radius = random.randint(2, 4)
-        brightness = random.randint(50, 150)
-        cv2.circle(background, (x, y), radius, (brightness, brightness, brightness), -1)
-    
-    return background
-
-
 def draw_gold_ring(image, ring, time_elapsed=0.0):
     """Draw a gold ring with animation effects."""
     if ring.collected:
@@ -112,20 +84,14 @@ def get_hand_positions(joints, jointPoints):
 
 def map_kinect_to_canvas(kinect_x, kinect_y, canvas_width, canvas_height):
     """Map Kinect color space coordinates to canvas coordinates."""
-    # Kinect color space is typically 1920x1080
-    kinect_width = 1920
-    kinect_height = 1080
+    # Since canvas matches Kinect color frame dimensions, use coordinates directly
+    # Just ensure they're integers and within bounds
+    canvas_x = int(kinect_x)
+    canvas_y = int(kinect_y)
     
-    # Scale and center
-    scale_x = canvas_width / kinect_width
-    scale_y = canvas_height / kinect_height
-    scale = min(scale_x, scale_y) * 0.9  # Use 90% to add padding
-    
-    offset_x = (canvas_width - kinect_width * scale) / 2
-    offset_y = (canvas_height - kinect_height * scale) / 2
-    
-    canvas_x = int(kinect_x * scale + offset_x)
-    canvas_y = int(kinect_y * scale + offset_y)
+    # Clamp to canvas bounds
+    canvas_x = max(0, min(canvas_x, canvas_width - 1))
+    canvas_y = max(0, min(canvas_y, canvas_height - 1))
     
     return canvas_x, canvas_y
 
@@ -336,6 +302,7 @@ def main():
 
     try:
         kinect = PyKinectRuntime.PyKinectRuntime(
+            PyKinectV2.FrameSourceTypes_Color |
             PyKinectV2.FrameSourceTypes_Body
         )
     except Exception as e:
@@ -347,12 +314,10 @@ def main():
     print("Press ESC to quit.")
     print("Move your hands to collect the gold rings!")
 
-    # Large canvas dimensions
-    canvas_width = 1920
-    canvas_height = 1080
-    
-    # Create space background
-    background = create_space_background(canvas_width, canvas_height)
+    # Canvas dimensions match Kinect color frame
+    canvas_width = kinect.color_frame_desc.Width
+    canvas_height = kinect.color_frame_desc.Height
+    print(f"Canvas size: {canvas_width}x{canvas_height}")
     
     # Initialize rings (a dozen or so)
     num_rings = 15
@@ -490,8 +455,23 @@ def main():
         if kinect.has_new_body_frame():
             bodies = kinect.get_last_body_frame()
 
-        # Create canvas from background
-        canvas = background.copy()
+        # Get color frame from Kinect for mixed reality background
+        color_img = None
+        if kinect.has_new_color_frame():
+            color_frame = kinect.get_last_color_frame()
+            color_img = color_frame.reshape(
+                (kinect.color_frame_desc.Height,
+                 kinect.color_frame_desc.Width, 4)
+            ).astype(np.uint8)
+            # Convert BGRA to BGR for OpenCV
+            color_img = cv2.cvtColor(color_img, cv2.COLOR_BGRA2BGR)
+        
+        # Use color frame as canvas, or create black canvas if no frame available
+        if color_img is not None:
+            canvas = color_img.copy()
+        else:
+            # Fallback to black canvas if no color frame available yet
+            canvas = np.zeros((canvas_height, canvas_width, 3), dtype=np.uint8)
         
         # Game state machine
         if game_state == 'playing':

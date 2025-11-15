@@ -1,6 +1,6 @@
 # Kinect v2 Applications
 
-A collection of Python applications for capturing and visualizing data from Microsoft Kinect v2, including color frames, depth maps, body skeleton tracking, stick figure animation, and interactive paint canvas.
+A collection of Python applications for capturing and visualizing data from Microsoft Kinect v2, including color frames, depth maps, body skeleton tracking, stick figure animation, interactive paint canvas, and mixed reality ring collector game.
 
 ## Features
 
@@ -8,11 +8,9 @@ A collection of Python applications for capturing and visualizing data from Micr
 - **Depth Frame Visualization**: Depth map visualization with color mapping
 - **Body Skeleton Tracking**: Real-time body pose detection and skeleton overlay on color frames
 - **Multi-frame Support**: Simultaneous capture of color, depth, and body tracking data
-
-## Games
 - **Stick Figure Animation**: Real-time stick figure drawing controlled by Kinect body movement with support for multiple people (up to 6)
 - **Paint Canvas**: Interactive fluid paint simulation where hand movements control paint flow with rainbow colors on a white canvas
-- **Ring Collector Game**: Interactive game where players collect gold rings by touching them with their hands, featuring a space background, body shadow tracking, timer, and automatic game reset
+- **Ring Collector Game**: Mixed reality game where players collect gold rings overlaid on live Kinect video feed, featuring body shadow tracking, timer, and automatic game reset
 
 ## Requirements
 
@@ -108,10 +106,10 @@ python kinect_v2_ring_collector.py
 ```
 
 The application will:
-- Initialize the Kinect v2 sensor (body tracking only)
-- Display a space-themed background with stars
-- Place 15 gold rings randomly across the playable area (avoiding outer 10% on left/right sides)
-- Track your body as a dark shadow skeleton
+- Initialize the Kinect v2 sensor (color video and body tracking)
+- Display live color video feed from the Kinect camera as the background
+- Overlay 15 gold rings randomly across the playable area (avoiding outer 10% on left/right sides)
+- Track your body as a dark shadow skeleton overlaid on the video
 - Detect when your hands "touch" rings to collect them
 - Display score and timer in the top corners
 - When all rings are collected:
@@ -122,16 +120,16 @@ The application will:
 - Press **ESC** to quit
 
 **Game Features**:
-- **Space Background**: Dark blue-purple background with randomly generated stars
-- **Gold Rings**: Animated rings with pulsing and sparkle effects
-- **Body Shadow**: Real-time skeleton shadow tracking your movements
+- **Mixed Reality**: Gold rings overlaid on live Kinect color video feed - see yourself and your environment in real-time
+- **Gold Rings**: Animated rings with pulsing and sparkle effects that appear to float in your space
+- **Body Shadow**: Real-time skeleton shadow tracking your movements overlaid on the video
 - **Collision Detection**: Rings disappear when your hand gets within touch distance
 - **Timer**: Tracks your completion time (MM:SS.CS format)
 - **Score Display**: Shows current score (collected/total rings)
 - **Auto-Reset**: Game automatically resets after countdown for continuous play
-- **Smart Placement**: Rings are spaced to avoid overlap and placed away from screen edges
+- **Smart Placement**: Rings are spaced to avoid overlap and placed away from screen edges for better accessibility
 
-**Note**: Move your hands in front of the Kinect sensor to collect the gold rings. Your body shadow will follow your movements in real-time. Touch rings with either hand to collect them. The game tracks your best time and automatically starts a new round after you complete all rings.
+**Note**: Move your hands in front of the Kinect sensor to collect the gold rings. You'll see yourself and your environment on screen with rings overlaid in mixed reality. Your body shadow will follow your movements in real-time. Touch rings with either hand to collect them. The game tracks your completion time and automatically starts a new round after you complete all rings.
 
 ## Dependencies
 
@@ -177,10 +175,10 @@ kinectApps/
   - Canvas slowly fades back to white over time, but stuck particles persist
   - Supports up to 6 people simultaneously (Kinect v2 limit)
 - **kinect_v2_ring_collector.py**:
-  - Space-themed game with starfield background
+  - Mixed reality game overlaying rings on live Kinect color video feed
   - 15 gold rings placed randomly with smart spacing algorithm
   - Rings avoid outer 10% of left/right screen edges for better accessibility
-  - Real-time body shadow tracking (skeleton overlay)
+  - Real-time body shadow tracking (skeleton overlay) on video background
   - Hand-based collision detection for ring collection
   - Timer tracks completion time with centisecond precision
   - Score display shows collected/total rings
@@ -189,6 +187,7 @@ kinectApps/
   - Automatic game reset for continuous play
   - Rings feature pulsing animation and rotating sparkle effects
   - Supports multiple people simultaneously (each person can collect rings)
+  - Uses Kinect color frame (1920x1080) as canvas for true mixed reality experience
 
 ## Troubleshooting
 
