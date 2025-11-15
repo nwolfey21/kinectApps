@@ -68,6 +68,128 @@ def draw_stick_figure_joint(joints, jointPoints, joint_idx, image, color, scale_
         cv2.circle(image, pt, 6, (0, 0, 0), 1)
 
 
+def detect_arm_position(joints, jointPoints):
+    """
+    Detect arm position: 'up', 'down', or 'wide'
+    Returns the most prominent arm position.
+    """
+    # Check if required joints are tracked
+    def is_tracked(joint_idx):
+        return joints[joint_idx].TrackingState != PyKinectV2.TrackingState_NotTracked
+    
+    def get_point(joint_idx):
+        pt = jointPoints[joint_idx]
+        if np.isnan(pt.x) or np.isnan(pt.y) or not np.isfinite(pt.x) or not np.isfinite(pt.y):
+            return None
+        return (pt.x, pt.y)
+    
+    # Get shoulder and hand positions
+    shoulder_left = get_point(PyKinectV2.JointType_ShoulderLeft) if is_tracked(PyKinectV2.JointType_ShoulderLeft) else None
+    shoulder_right = get_point(PyKinectV2.JointType_ShoulderRight) if is_tracked(PyKinectV2.JointType_ShoulderRight) else None
+    hand_left = get_point(PyKinectV2.JointType_HandLeft) if is_tracked(PyKinectV2.JointType_HandLeft) else None
+    hand_right = get_point(PyKinectV2.JointType_HandRight) if is_tracked(PyKinectV2.JointType_HandRight) else None
+    spine_shoulder = get_point(PyKinectV2.JointType_SpineShoulder) if is_tracked(PyKinectV2.JointType_SpineShoulder) else None
+    
+    arm_positions = []
+    
+    # Check left arm
+    if shoulder_left and hand_left:
+        is_up = hand_left[1] < shoulder_left[1] - 50  # Hand significantly above shoulder
+        is_wide = False
+        if spine_shoulder:
+            horizontal_distance = abs(hand_left[0] - spine_shoulder[0])
+            vertical_distance = abs(hand_left[1] - shoulder_left[1])
+            # Wide if horizontal distance is large relative to vertical
+            is_wide = horizontal_distance > 150 and horizontal_distance > vertical_distance * 1.5
+        
+        if is_wide:
+            arm_positions.append('wide')
+        elif is_up:
+            arm_positions.append('up')
+        elif hand_left[1] > shoulder_left[1] + 20:  # Hand below shoulder
+            arm_positions.append('down')
+    
+    # Check right arm
+    if shoulder_right and hand_right:
+        is_up = hand_right[1] < shoulder_right[1] - 50  # Hand significantly above shoulder
+        is_wide = False
+        if spine_shoulder:
+            horizontal_distance = abs(hand_right[0] - spine_shoulder[0])
+            vertical_distance = abs(hand_right[1] - shoulder_right[1])
+            # Wide if horizontal distance is large relative to vertical
+            is_wide = horizontal_distance > 150 and horizontal_distance > vertical_distance * 1.5
+        
+        if is_wide:
+            arm_positions.append('wide')
+        elif is_up:
+            arm_positions.append('up')
+        elif hand_right[1] > shoulder_right[1] + 20:  # Hand below shoulder
+            arm_positions.append('down')
+    
+    # Determine expression based on arm positions
+    # Priority: wide > up > down
+    if 'wide' in arm_positions:
+        return 'wide'
+    elif 'up' in arm_positions:
+        return 'up'
+    elif 'down' in arm_positions:
+        return 'down'
+    else:
+        return 'down'  # Default to down
+
+
+def draw_face(image, head_center, head_radius, expression, color):
+    """
+    Draw a face with expression on the stick figure.
+    expression: 'up' (smile), 'down' (frown), or 'wide' (silly)
+    """
+    h, w = image.shape[:2]
+    cx, cy = int(head_center[0]), int(head_center[1])
+    
+    # Check bounds
+    if not (0 <= cx < w and 0 <= cy < h):
+        return
+    
+    # Draw head circle
+    cv2.circle(image, (cx, cy), head_radius, color, 2)
+    
+    # Draw face based on expression
+    if expression == 'up':  # Smiling face
+        # Eyes
+        eye_y = cy - head_radius // 3
+        eye_size = head_radius // 6
+        cv2.circle(image, (cx - head_radius // 3, eye_y), eye_size, color, -1)
+        cv2.circle(image, (cx + head_radius // 3, eye_y), eye_size, color, -1)
+        # Smile (arc)
+        smile_y = cy + head_radius // 4
+        cv2.ellipse(image, (cx, smile_y), (head_radius // 2, head_radius // 3), 
+                   0, 0, 180, color, 2)
+    
+    elif expression == 'down':  # Frowning face
+        # Eyes
+        eye_y = cy - head_radius // 3
+        eye_size = head_radius // 6
+        cv2.circle(image, (cx - head_radius // 3, eye_y), eye_size, color, -1)
+        cv2.circle(image, (cx + head_radius // 3, eye_y), eye_size, color, -1)
+        # Frown (inverted arc)
+        frown_y = cy + head_radius // 3
+        cv2.ellipse(image, (cx, frown_y), (head_radius // 2, head_radius // 3), 
+                   0, 180, 360, color, 2)
+    
+    elif expression == 'wide':  # Silly face
+        # Wide eyes (larger)
+        eye_y = cy - head_radius // 4
+        eye_size = head_radius // 4
+        cv2.circle(image, (cx - head_radius // 3, eye_y), eye_size, color, -1)
+        cv2.circle(image, (cx + head_radius // 3, eye_y), eye_size, color, -1)
+        # Silly mouth (wide open circle)
+        mouth_y = cy + head_radius // 3
+        cv2.ellipse(image, (cx, mouth_y), (head_radius // 3, head_radius // 4), 
+                   0, 0, 360, color, 2)
+        # Tongue (small circle inside mouth)
+        cv2.circle(image, (cx, mouth_y + head_radius // 8), head_radius // 6, color, -1)
+
+
 def draw_stick_figure(joints, jointPoints, image, color, scale_x=1.0, scale_y=1.0, offset_x=0, offset_y=0):
     """
     Draw a complete stick figure based on Kinect skeleton data.
@@ -109,9 +231,41 @@ def draw_stick_figure(joints, jointPoints, image, color, scale_x=1.0, scale_y=1.
     for bone in bones:
         draw_stick_figure_bone(joints, jointPoints, bone[0], bone[1], image, color, scale_x, scale_y, offset_x, offset_y)
     
-    # Draw all joints
+    # Draw all joints (except head, we'll draw that separately with face)
     for i in range(len(jointPoints)):
-        draw_stick_figure_joint(joints, jointPoints, i, image, color, scale_x, scale_y, offset_x, offset_y)
+        if i != PyKinectV2.JointType_Head:  # Skip head joint, we'll draw it with the face
+            draw_stick_figure_joint(joints, jointPoints, i, image, color, scale_x, scale_y, offset_x, offset_y)
+    
+    # Detect arm position for facial expression
+    arm_position = detect_arm_position(joints, jointPoints)
+    
+    # Draw head and face
+    head_joint = PyKinectV2.JointType_Head
+    if joints[head_joint].TrackingState != PyKinectV2.TrackingState_NotTracked:
+        head_pt = jointPoints[head_joint]
+        head_x = head_pt.x * scale_x + offset_x
+        head_y = head_pt.y * scale_y + offset_y
+        
+        # Check for valid head position
+        if not (np.isnan(head_x) or np.isnan(head_y) or not np.isfinite(head_x) or not np.isfinite(head_y)):
+            # Calculate head radius based on distance from head to neck
+            neck_joint = PyKinectV2.JointType_Neck
+            if joints[neck_joint].TrackingState != PyKinectV2.TrackingState_NotTracked:
+                neck_pt = jointPoints[neck_joint]
+                neck_x = neck_pt.x * scale_x + offset_x
+                neck_y = neck_pt.y * scale_y + offset_y
+                
+                if not (np.isnan(neck_x) or np.isnan(neck_y) or not np.isfinite(neck_x) or not np.isfinite(neck_y)):
+                    # Head radius is approximately the distance from head to neck
+                    head_radius = int(np.sqrt((head_x - neck_x)**2 + (head_y - neck_y)**2) * 0.8)
+                    head_radius = max(15, min(head_radius, 40))  # Clamp between 15 and 40 pixels
+                else:
+                    head_radius = 20  # Default radius
+            else:
+                head_radius = 20  # Default radius
+            
+            # Draw face with expression
+            draw_face(image, (head_x, head_y), head_radius, arm_position, color)
 
 
 def calculate_bounding_box(jointPoints):
